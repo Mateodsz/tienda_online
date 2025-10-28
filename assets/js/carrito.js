@@ -1,49 +1,54 @@
-
 //DOM
 document.addEventListener('DOMContentLoaded', () => { 
     // Variables
     const baseDeDatos = [
         {
             id: 1,
-            nombre: 'Sombrero vueltiao con la bandera de Colombia, 23 vueltas',
-            precio: 250000,
-            imagen: 'assets/img/feature_prod_01.jpg',
-            categoria: 'sombreros'
+            nombre: 'Deditos de queso',
+            descripcion: 'Crujientes y rellenos de delicioso queso costeño, ideales para compartir.',
+            precio: 25000,
+            imagen: 'assets/img/feature_prod_02.jpg',
+            categoria: 'salados'
         },
         {
             id: 2,
-            nombre: 'Sombrero vueltiao-machiembriao',
-            precio: 150000,
-            imagen: 'assets/img/sombrero4.jpg',
-            categoria: 'sombreros'
+            nombre: 'Spring Rolls',
+            descripcion: 'Rollitos de verduras frescas y pollo con salsa agridulce.',
+            precio: 30000,
+            imagen: 'assets/img/shop_04.jpg',
+            categoria: 'salados'
         },
         {
             id: 3,
-            nombre: 'Sombrero vueltiao colombiano 15 vueltas tricolor',
-            precio: 250000,
-            imagen: 'assets/img/feature_prod_02.jpg',
-            categoria: 'sombreros'
+            nombre: 'Cocada',
+            descripcion: 'Cocada artesanal de coco tostado con un toque de panela',
+            precio: 18000,
+            imagen: 'assets/img/bolso2.jpg',
+            categoria: 'dulces'
         },
         {
             id: 4,
-            nombre: 'Mochila wayuu azul 6',
-            precio: 120000,
-            imagen: 'assets/img/shop_04.jpg',
-            categoria: 'mochilas'
+            nombre: 'Deditos de salchicha',
+            descripcion: 'Salchichas envueltas en hojaldre, perfectas para eventos.',
+            precio: 20000,
+            imagen: 'assets/img/sombrero3.jpg',
+            categoria: 'salados'
         },
         {
             id: 5,
-            nombre: 'Bolso en fique',
-            precio: 120000,
+            nombre: 'Cocadas artesanales',
+            descripcion: 'Dulce de coco rallado con azúcar y leche, horneadas suavemente.',
+            precio: 25000,
             imagen: 'assets/img/shop_03.jpg',
-            categoria: 'bolsos'
+            categoria: 'dulces'
         },
         {
             id: 6,
-            nombre: 'Hamaca',
-            precio: 120000,
+            nombre: 'Pinchos de frutas con chocolate',
+            descripcion: 'Fresas, banano y uvas bañadas en chocolate semiamargo.',
+            precio: 35000,
             imagen: 'assets/img/category_img_02.jpg',
-            categoria: 'hamacas'
+            categoria: 'dulces'
         }
     ];
 
@@ -56,80 +61,92 @@ document.addEventListener('DOMContentLoaded', () => {
     const miLocalStorage = window.localStorage;
     const filtroSelect = document.getElementById("filtro");
 
-    // Funciones
-
+    // Función para renderizar productos
     function renderizarProductos() {
         DOMitems.innerHTML = "";
-        const filtro = filtroSelect.value;
-        const productosFiltrados = baseDeDatos.filter(producto => 
-            filtro === "todas" || producto.categoria === filtro
-        );
+
+        const filtro = filtroSelect.value.trim().toLowerCase();
+
+        const productosFiltrados = baseDeDatos.filter(producto => {
+            if (filtro === "todas") return true;
+            return producto.categoria.toLowerCase().includes(filtro);
+        });
+
         productosFiltrados.forEach((info) => {
             const miNodo = document.createElement('div');
-            miNodo.classList.add('card', 'col-sm-4');
+            miNodo.classList.add('card', 'col-sm-4', 'mb-3', 'p-2');
+            
             const miNodoCardBody = document.createElement('div');
-            miNodoCardBody.classList.add('card-body');
+            miNodoCardBody.classList.add('card-body', 'text-center');
+            
+            const miNodoImagen = document.createElement('img');
+            miNodoImagen.classList.add('img-fluid', 'mb-2');
+            miNodoImagen.setAttribute('src', info.imagen);
+            
             const miNodoTitle = document.createElement('h6');
             miNodoTitle.classList.add('card-title');
             miNodoTitle.textContent = info.nombre;
-            const miNodoImagen = document.createElement('img');
-            miNodoImagen.classList.add('img-fluid');
-            miNodoImagen.setAttribute('src', info.imagen);
+
+            const miNodoDesc = document.createElement('p');
+            miNodoDesc.classList.add('text-muted', 'small');
+            miNodoDesc.textContent = info.descripcion;
+
             const miNodoPrecio = document.createElement('p');
-            miNodoPrecio.classList.add('card-text');
+            miNodoPrecio.classList.add('card-text', 'fw-bold');
             miNodoPrecio.textContent = `${info.precio}${divisa}`;
+
             const miNodoBoton = document.createElement('button');
             miNodoBoton.classList.add('btn', 'btn-primary');
             miNodoBoton.textContent = 'Agregar';
             miNodoBoton.setAttribute('marcador', info.id);
             miNodoBoton.addEventListener('click', anadirProductoAlCarrito);
+
             miNodoCardBody.appendChild(miNodoImagen);
             miNodoCardBody.appendChild(miNodoTitle);
+            miNodoCardBody.appendChild(miNodoDesc);
             miNodoCardBody.appendChild(miNodoPrecio);
             miNodoCardBody.appendChild(miNodoBoton);
             miNodo.appendChild(miNodoCardBody);
             DOMitems.appendChild(miNodo);
         });
     }
-// Obtén el contador del almacenamiento local
+
+    // Contador de visitas
     let visitas = localStorage.getItem('contadorVisitas');
-// Si no hay visitas almacenadas, inicializa a 0
     if (!visitas) {
         visitas = 0;
     }
-// Incrementa el contador
     visitas++;
-// Guarda el nuevo contador en el almacenamiento local
     localStorage.setItem('contadorVisitas', visitas);
-// Muestra el contador en la página
     document.getElementById('contador').textContent = visitas;
+
+    // Añadir producto al carrito
     function anadirProductoAlCarrito(evento) {
         carrito.push(evento.target.getAttribute('marcador'));
         renderizarCarrito();
         guardarCarritoEnLocalStorage();
         handleCarritoValue(carrito.length);
     }
+
+    // Actualizar número del carrito
     function handleCarritoValue(value) {
         const carritoContainer = document.getElementById("carrito-value");
         carritoContainer.textContent = `${value}`;
     }
+
+    // Renderizar carrito
     function renderizarCarrito() {
         DOMcarrito.textContent = '';
         const carritoSinDuplicados = [...new Set(carrito)];
         carritoSinDuplicados.forEach((item) => {
-            const miItem = baseDeDatos.filter((itemBaseDatos) => {
-                return itemBaseDatos.id === parseInt(item);
-            });
-            const numeroUnidadesItem = carrito.reduce((total, itemId) => {
-                return itemId === item ? total += 1 : total;
-            }, 0);
+            const miItem = baseDeDatos.filter((itemBaseDatos) => itemBaseDatos.id === parseInt(item))[0];
+            const numeroUnidadesItem = carrito.reduce((total, itemId) => itemId === item ? total += 1 : total, 0);
             const miNodo = document.createElement('li');
             miNodo.classList.add('list-group-item', 'text-right', 'mx-2');
-            miNodo.textContent = `${numeroUnidadesItem} x ${miItem[0].nombre} - ${miItem[0].precio}${divisa}`;
+            miNodo.textContent = `${numeroUnidadesItem} x ${miItem.nombre} - ${miItem.precio}${divisa}`;
             const miBoton = document.createElement('button');
-            miBoton.classList.add('btn', 'btn-danger', 'mx-5');
+            miBoton.classList.add('btn', 'btn-danger', 'mx-3');
             miBoton.textContent = 'X';
-            miBoton.style.marginLeft = '1rem';
             miBoton.dataset.item = item;
             miBoton.addEventListener('click', borrarItemCarrito);
             miNodo.appendChild(miBoton);
@@ -137,45 +154,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         DOMtotal.textContent = calcularTotal();
     }
-    //borra carrito
+
+    // Borrar item del carrito
     function borrarItemCarrito(evento) {
         const id = evento.target.dataset.item;
-        carrito = carrito.filter((carritoId) => {
-            return carritoId !== id;
-        });
+        carrito = carrito.filter((carritoId) => carritoId !== id);
         renderizarCarrito();
         guardarCarritoEnLocalStorage();
         handleCarritoValue(carrito.length);
     }
-    //calcular el total
+
+    // Calcular total
     function calcularTotal() {
         return carrito.reduce((total, item) => {
-            const miItem = baseDeDatos.filter((itemBaseDatos) => {
-                return itemBaseDatos.id === parseInt(item);
-            });
-            return total + miItem[0].precio;
+            const miItem = baseDeDatos.find(producto => producto.id === parseInt(item));
+            return total + miItem.precio;
         }, 0).toFixed(2);
     }
-    //vaciar todos los elementos del carrito
+
+    // Vaciar carrito
     function vaciarCarrito() {
         carrito = [];
         renderizarCarrito();
         localStorage.clear();
+        handleCarritoValue(0);
     }
-    //guardar en local el carrito
+
+    // Guardar carrito
     function guardarCarritoEnLocalStorage() {
         miLocalStorage.setItem('carrito', JSON.stringify(carrito));
     }
-    //cargar del local el carriro
+
+    // Cargar carrito
     function cargarCarritoDeLocalStorage() {
         if (miLocalStorage.getItem('carrito') !== null) {
             carrito = JSON.parse(miLocalStorage.getItem('carrito'));
             handleCarritoValue(carrito.length);
         }
     }
+
     // Eventos
     DOMbotonVaciar.addEventListener('click', vaciarCarrito);
     filtroSelect.addEventListener('change', renderizarProductos);
+
     // Inicio
     cargarCarritoDeLocalStorage();
     renderizarProductos();
